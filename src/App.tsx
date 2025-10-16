@@ -46,7 +46,14 @@ import {
   Globe,
   Server,
   Wifi,
-  Heart
+  Heart,
+  Code,
+  Database,
+  Cpu,
+  HardDrive,
+  Monitor,
+  Gauge,
+  Swords
 } from 'lucide-react';
 
 // Header Navigation Component
@@ -191,14 +198,6 @@ const HeroSection: React.FC = () => {
                 <Flame className="w-6 h-6 text-red-500 animate-pulse" />
               </div>
               
-              {/* Dynamic Logo */}
-              <div className="relative">
-                <h1 className="text-7xl md:text-9xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-red-500 to-orange-600 leading-none tracking-tight font-mono">
-                  CİNAYET
-                </h1>
-                <div className="absolute -inset-1 bg-gradient-to-r from-orange-600/20 to-red-600/20 blur-xl animate-pulse"></div>
-              </div>
-              
               {/* Typed Subtitle */}
               <div className="h-16 flex items-center justify-center">
                 <h2 className="text-3xl md:text-4xl font-bold text-white">
@@ -292,11 +291,10 @@ const HeroSection: React.FC = () => {
           <div className="absolute right-4 top-1/2 transform -translate-y-1/2 space-y-4 max-w-xs hidden lg:block">
             <div className="bg-black/70 backdrop-blur-sm rounded-lg p-4 border border-orange-500/30">
               <h3 className="text-orange-400 font-bold text-sm mb-3 flex items-center">
-                <Trophy className="w-4 h-4 mr-2" />
+                <Trophy className="w-4h-4 mr-2" />
                 TOP ÇETELER
               </h3>
-              {[
-                { name: "Kara Kartallar", members: "127" },
+              {[{ name: "KaraKartallar", members: "127" },
                 { name: "Ateş Ejderleri", members: "104" }, 
                 { name: "Gece Avcıları", members: "98" },
                 { name: "Kan Kardeşleri", members: "89" }
@@ -431,6 +429,168 @@ const UserStats: React.FC = () => {
   );
 };
 
+// NEW: Game Classes Component (replaces ProjectStats)
+const GameClasses: React.FC = () => {
+  const [selectedClass, setSelectedClass] = useState(0);
+
+  const gameClasses = [
+    {
+      name: "SAVAŞÇI",
+      icon: <Sword className="w-8 h-8" />,
+      color: "text-red-500",
+      bgColor: "from-red-600/20 to-red-800/20",
+      borderColor: "border-red-500/50",
+      description: "Yakın dövüş uzmanı",
+      stats: { güç: 95, çeviklik: 70, savunma: 85, zeka: 50 },
+      weapons: ["Kılıç", "Balta", "Çekiç"],
+      abilities: ["Güçlü Saldırı", "Kalkan Ustası", "Savaş Çığlığı"],
+      bonus: "+25% Yakın Dövüş Hasarı"
+    },
+    {
+      name: "SUIKASTÇI",
+      icon: <Target className="w-8 h-8" />,
+      color: "text-purple-500",
+      bgColor: "from-purple-600/20 to-purple-800/20",
+      borderColor: "border-purple-500/50",
+      description: "Gizlilik ve hız uzmanı",
+      stats: { güç: 75, çeviklik: 95, savunma: 60, zeka: 80 },
+      weapons: ["Hançer", "Yay", "Zehirli İğne"],
+      abilities: ["Gölge Adımı", "Kritik Vuruş", "Gizlenme"],
+      bonus: "+30% Kritik Şansı"
+    },
+    {
+      name: "ÇETECI",
+      icon: <Users className="w-8 h-8" />,
+      color: "text-orange-500",
+      bgColor: "from-orange-600/20 to-orange-800/20",
+      borderColor: "border-orange-500/50",
+      description: "Liderlik ve organizasyon",
+      stats: { güç: 70, çeviklik: 65, savunma: 75, zeka: 90 },
+      weapons: ["Tabanca", "Pompalı", "Makineli"],
+      abilities: ["Çete Komutası", "Kaynak Yönetimi", "Pazarlık"],
+      bonus: "+20% Çete Bonusu"
+    },
+    {
+      name: "KORUYUCU",
+      icon: <Shield className="w-8 h-8" />,
+      color: "text-blue-500",
+      bgColor: "from-blue-600/20 to-blue-800/20",
+      borderColor: "border-blue-500/50",
+      description: "Savunma ve dayanıklılık",
+      stats: { güç: 60, çeviklik: 50, savunma: 95, zeka: 75 },
+      weapons: ["Kalkan", "Zırh", "Savunma Kulesi"],
+      abilities: ["Kalkan Duvarı", "Hasar Emme", "Koruma Alanı"],
+      bonus: "+40% Hasar Azaltma"
+    }
+  ];
+
+  return (
+    <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg p-6 border border-gray-600 hover:border-orange-500/50 transition-all duration-300">
+      <h3 className="text-white font-bold mb-4 flex items-center">
+        <Swords className="w-5 h-5 mr-2 text-orange-500" />
+        Karakter Sınıfları
+      </h3>
+      
+      {/* Class Selection Tabs */}
+      <div className="grid grid-cols-2 gap-2 mb-6">
+        {gameClasses.map((gameClass, index) => (
+          <button
+            key={index}
+            onClick={() => setSelectedClass(index)}
+            className={`p-3 rounded-lg transition-all duration-300 border ${
+              selectedClass === index
+                ? `bg-gradient-to-r ${gameClass.bgColor} ${gameClass.borderColor} ${gameClass.color}`
+                : 'bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600'
+            }`}
+          >
+            <div className="flex items-center space-x-2">
+              <div className={selectedClass === index ? gameClass.color : 'text-gray-400'}>
+                {gameClass.icon}
+              </div>
+              <div>
+                <div className="font-bold text-sm">{gameClass.name}</div>
+                <div className="text-xs opacity-75">{gameClass.description}</div>
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
+
+      {/* Selected Class Details */}
+      <div className={`bg-gradient-to-br ${gameClasses[selectedClass].bgColor} p-4 rounded-lg border ${gameClasses[selectedClass].borderColor} mb-4`}>
+        <div className="flex items-center space-x-3 mb-4">
+          <div className={gameClasses[selectedClass].color}>
+            {gameClasses[selectedClass].icon}
+          </div>
+          <div>
+            <h4 className="text-white font-bold text-lg">{gameClasses[selectedClass].name}</h4>
+            <p className="text-gray-300 text-sm">{gameClasses[selectedClass].description}</p>
+          </div>
+        </div>
+
+        {/* Stats */}
+        <div className="space-y-3 mb-4">
+          <h5 className="text-white font-semibold text-sm">Özellikler</h5>
+          {Object.entries(gameClasses[selectedClass].stats).map(([stat, value]) => (
+            <div key={stat} className="space-y-1">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-300 capitalize">{stat}</span>
+                <span className="text-white font-bold">{value}</span>
+              </div>
+              <div className="w-full bg-gray-700 rounded-full h-2">
+                <div 
+                  className={`bg-gradient-to-r ${gameClasses[selectedClass].bgColor.replace('/20', '')} h-2 rounded-full transition-all duration-1000`}
+                  style={{ width: `${value}%` }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Bonus */}
+        <div className={`bg-black/30 p-3 rounded border border-gray-600 mb-4`}>
+          <div className="text-xs text-gray-400 mb-1">ÖZEL BONUS</div>
+          <div className={`${gameClasses[selectedClass].color} font-bold text-sm`}>
+            {gameClasses[selectedClass].bonus}
+          </div>
+        </div>
+
+        {/* Weapons & Abilities */}
+        <div className="grid grid-cols-1 gap-4">
+          <div>
+            <h6 className="text-white font-semibold text-sm mb-2">Silahlar</h6>
+            <div className="flex flex-wrap gap-1">
+              {gameClasses[selectedClass].weapons.map((weapon, i) => (
+                <span key={i} className="bg-gray-700 text-gray-300 text-xs px-2 py-1 rounded">
+                  {weapon}
+                </span>
+              ))}
+            </div>
+          </div>
+          <div>
+            <h6 className="text-white font-semibold text-sm mb-2">Yetenekler</h6>
+            <div className="flex flex-wrap gap-1">
+              {gameClasses[selectedClass].abilities.map((ability, i) => (
+                <span key={i} className={`bg-gradient-to-r ${gameClasses[selectedClass].bgColor} text-white text-xs px-2 py-1 rounded border ${gameClasses[selectedClass].borderColor}`}>
+                  {ability}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Action */}
+      <button className={`w-full bg-gradient-to-r ${gameClasses[selectedClass].bgColor} hover:opacity-80 text-white py-3 rounded-lg font-bold transition-all duration-300 border ${gameClasses[selectedClass].borderColor}`}>
+        <span className="flex items-center justify-center space-x-2">
+          {gameClasses[selectedClass].icon}
+          <span>{gameClasses[selectedClass].name} OLARAK BAŞLA</span>
+        </span>
+      </button>
+    </div>
+  );
+};
+
 // Top Features Component
 const TopFeatures: React.FC = () => {
   const features = [
@@ -446,7 +606,7 @@ const TopFeatures: React.FC = () => {
     { icon: <Home className="w-5 h-5" />, tooltip: "Ev" },
     { icon: <ShoppingBag className="w-5 h-5" />, tooltip: "Market" },
     { icon: <Plane className="w-5 h-5" />, tooltip: "Seyahat" },
-    { icon: <Building className="w-5 h-5" />, tooltip: "Şirket" },
+    {icon: <Building className="w-5 h-5" />, tooltip: "Şirket" },
     { icon: <Crown className="w-5 h-5" />, tooltip: "Liderlik" },
     { icon: <Gamepad2 className="w-5 h-5" />, tooltip: "Oyunlar" },
     { icon: <Calendar className="w-5 h-5" />, tooltip: "Etkinlikler" }
@@ -529,6 +689,187 @@ const GlobalRank: React.FC = () => {
       <div className="mt-4 text-center">
         <button className="text-gray-400 hover:text-orange-400 text-sm transition-colors border border-gray-600 hover:border-orange-500 px-4 py-2 rounded">
           👑 Aylık Sıralama
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// FIXED: Clan Rankings Component with improved layout
+const ClanRankings: React.FC = () => {
+  const [selectedPeriod, setSelectedPeriod] = useState(0);
+  
+  const periods = ["Günlük", "Haftalık", "Aylık", "Tüm Zamanlar"];
+  
+  const clans = [
+    {
+      rank: 1,
+      name: "KaraKartallar",
+      logo: "🦅",
+      members: 127,
+      power: 94580,
+      territories: 8,
+      leader: "KartalKomutan",
+      wars: { won: 23, lost: 3 },
+      trend: "+15.2%"
+    },
+    {
+      rank: 2,
+      name: "Ateş Ejderleri", 
+      logo: "🐲",
+      members: 104,
+      power: 89210,
+      territories: 7,
+      leader: "EjderKral",
+      wars: { won: 19, lost: 5 },
+      trend: "+12.8%"
+    },
+    {
+      rank: 3,
+      name: "Gece Avcıları",
+      logo: "🌙",
+      members: 98,
+      power: 78950,
+      territories: 6,
+      leader: "GeceReis", 
+      wars: { won: 17, lost: 4 },
+      trend: "+9.5%"
+    },
+    {
+      rank: 4,
+      name: "Kan Kardeşleri",
+      logo: "⚔️",
+      members: 89,
+      power: 71430,
+      territories: 5,
+      leader: "KanlıKhan",
+      wars: { won: 15, lost: 6 },
+      trend: "+7.3%"
+    },
+    {
+      rank: 5,
+      name: "Demir Pençe",
+      logo: "🔥",
+      members: 82,
+      power: 65780,
+      territories: 4,
+      leader: "DemirLord",
+      wars: { won: 12, lost: 8 },
+      trend: "+5.1%"
+    }
+  ];
+
+  return (
+    <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg p-6 border border-gray-600 hover:border-orange-500/50 transition-all duration-300">
+      <h3 className="text-white font-bold mb-4 flex items-center">
+        <Users className="w-5 h-5 mr-2 text-orange-500" />
+        Clan Sıralamaları
+      </h3>
+      
+      {/* Period Selection */}
+      <div className="flex space-x-1 mb-6 bg-gray-700/30 rounded-lg p-1">
+        {periods.map((period, index) => (
+          <button
+            key={index}
+            onClick={() => setSelectedPeriod(index)}
+            className={`flex-1 py-2 px-2 rounded-md text-xs font-medium transition-all duration-300 ${
+              selectedPeriod === index
+                ? 'bg-gradient-to-r from-orange-600 to-red-600 text-white shadow-lg'
+                : 'text-gray-300 hover:text-white hover:bg-gray-600/50'
+            }`}
+          >
+            {period}
+          </button>
+        ))}
+      </div>
+
+      {/* Rankings List - Simplified Layout */}
+      <div className="space-y-3 mb-6">
+        {clans.map((clan, index) => (
+          <div 
+            key={clan.rank} 
+            className={`p-4 rounded-lg border transition-all duration-300 hover:border-orange-500/50 ${
+              index === 0 ? 'bg-gradient-to-r from-yellow-900/20 to-orange-900/20 border-orange-500/30' :
+              index === 1 ? 'bg-gradient-to-r from-gray-600/20 to-gray-700/20 border-gray-500/30' :
+              index === 2 ? 'bg-gradient-to-r from-amber-900/20 to-orange-800/20 border-amber-600/30' :
+              'bg-gray-700/30 border-gray-600/30'
+            }`}
+          >
+            {/* Top Row - Rank, Logo, Name */}
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center space-x-3">
+                <div className={`text-xl font-bold ${
+                  index === 0 ? 'text-orange-500' : 
+                  index === 1 ? 'text-gray-300' : 
+                  index === 2 ? 'text-amber-600' : 
+                  'text-gray-400'
+                }`}>
+                  #{clan.rank}
+                </div>
+                <div className="text-2xl">{clan.logo}</div>
+                <div>
+                  <div className="text-white font-bold text-sm">{clan.name}</div>
+                  <div className="text-gray-400 text-xs">Lider: {clan.leader}</div>
+                </div>
+              </div>
+              <div className="text-green-400 font-bold text-sm">{clan.trend}</div>
+            </div>
+
+            {/* Bottom Row - Stats Grid */}
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div>
+                <div className="text-white font-bold text-sm">{clan.power.toLocaleString()}</div>
+                <div className="text-xs text-gray-400">Güç</div>
+              </div>
+              <div>
+                <div className="text-white font-bold text-sm">{clan.members}</div>
+                <div className="text-xs text-gray-400">Üye</div>
+              </div>
+              <div>
+                <div className="text-white font-bold text-sm">{clan.territories}</div>
+                <div className="text-xs text-gray-400">Bölge</div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* War Statistics */}
+      <div className="bg-gradient-to-r from-red-900/20 to-orange-900/20 p-4 rounded-lg border border-red-500/30 mb-4">
+        <h4 className="text-red-400 font-bold text-sm mb-3 flex items-center">
+          <Swords className="w-4 h-4 mr-2" />
+          Aktif Savaşlar
+        </h4>
+        <div className="grid grid-cols-3 gap-4 text-center">
+          <div>
+            <div className="text-red-400 font-bold text-lg">12</div>
+            <div className="text-xs text-gray-400">Devam Eden</div>
+          </div>
+          <div>
+            <div className="text-orange-400 font-bold text-lg">47</div>
+            <div className="text-xs text-gray-400">Bu Hafta</div>
+          </div>
+          <div>
+            <div className="text-yellow-400 font-bold text-lg">189</div>
+            <div className="text-xs text-gray-400">Bu Ay</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="grid grid-cols-2 gap-3">
+        <button className="bg-gradient-to-r from-orange-600/20 to-red-600/20 hover:from-orange-600/30 hover:to-red-600/30 text-orange-400 py-3 px-4 rounded-lg font-bold transition-all duration-300 border border-orange-500/30 hover:border-orange-500/50 text-xs">
+          <span className="flex items-center justify-center space-x-2">
+            <Users className="w-4 h-4" />
+            <span>Clan Kur</span>
+          </span>
+        </button>
+        
+        <button className="bg-gradient-to-r from-red-600/20 to-orange-600/20 hover:from-red-600/30 hover:to-orange-600/30 text-red-400 py-3 px-4 rounded-lg font-bold transition-all duration-300 border border-red-500/30 hover:border-red-500/50 text-xs">
+          <span className="flex items-center justify-center space-x-2">
+            <Sword className="w-4 h-4" />
+            <span>Savaş İlan Et</span>
+          </span>
         </button>
       </div>
     </div>
@@ -716,7 +1057,7 @@ const TextBasedGames: React.FC = () => {
       </h3>
       
       <p className="text-gray-300 text-sm mb-4 leading-relaxed">
-        Cinayet heyecan verici, gerçek rol tabanlı oyundur. Metin tabanlı oyunlar 
+        Cinayet heyecan verici, gerçek rol tabanlıoyundur. Metin tabanlı oyunlar 
         bağımlılık yaratır ve oynaması eğlencelidir. Cinayet bu konudadır!
       </p>
       
@@ -858,12 +1199,14 @@ function App() {
             <div className="space-y-8">
               <JoinSection />
               <UserStats />
+              <GameClasses />
             </div>
             
             {/* Middle Column */}
             <div className="space-y-8">
               <TopFeatures />
               <GlobalRank />
+              <ClanRankings />
               <Reviews />
             </div>
             
