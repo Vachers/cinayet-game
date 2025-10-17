@@ -291,8 +291,7 @@ const HeroSection: React.FC = () => {
           <div className="absolute right-4 top-1/2 transform -translate-y-1/2 space-y-4 max-w-xs hidden lg:block">
             <div className="bg-black/70 backdrop-blur-sm rounded-lg p-4 border border-orange-500/30">
               <h3 className="text-orange-400 font-bold text-sm mb-3 flex items-center">
-                <Trophy className="w-4h-4 mr-2" />
-                TOP ÇETELER
+                <Trophy className="w4h-4 mr-2" />TOP ÇETELER
               </h3>
               {[{ name: "KaraKartallar", members: "127" },
                 { name: "Ateş Ejderleri", members: "104" }, 
@@ -570,7 +569,7 @@ const GameClasses: React.FC = () => {
           <div>
             <h6 className="text-white font-semibold text-sm mb-2">Yetenekler</h6>
             <div className="flex flex-wrap gap-1">
-              {gameClasses[selectedClass].abilities.map((ability, i) => (
+              {gameClasses[selectedClass].abilities.map((ability,i) => (
                 <span key={i} className={`bg-gradient-to-r ${gameClasses[selectedClass].bgColor} text-white text-xs px-2 py-1 rounded border ${gameClasses[selectedClass].borderColor}`}>
                   {ability}
                 </span>
@@ -591,25 +590,91 @@ const GameClasses: React.FC = () => {
   );
 };
 
-// Top Features Component
+// Enhanced Top Features Component with Square and Gentle Icon Containers
 const TopFeatures: React.FC = () => {
+  const [selectedFeature, setSelectedFeature] = useState<number | null>(null);
+
   const features = [
-    { icon: <User className="w-5 h-5" />, tooltip: "Profil" },
-    { icon: <Users className="w-5 h-5" />, tooltip: "Çeteler" },
-    { icon: <Shield className="w-5 h-5" />, tooltip: "Savunma" },
-    { icon: <Sword className="w-5 h-5" />, tooltip: "Saldırı" },
-    { icon:<Target className="w-5 h-5" />, tooltip: "Hedef" },
-    { icon: <Star className="w-5 h-5" />, tooltip:"Değerlendirme" },
-    { icon: <Crosshair className="w-5 h-5" />, tooltip: "Silahlar" },
-    { icon: <Car className="w-5 h-5" />, tooltip: "Araçlar" },
-    { icon: <Briefcase className="w-5 h-5" />, tooltip: "İş" },
-    { icon: <Home className="w-5 h-5" />, tooltip: "Ev" },
-    { icon: <ShoppingBag className="w-5 h-5" />, tooltip: "Market" },
-    { icon: <Plane className="w-5 h-5" />, tooltip: "Seyahat" },
-    {icon: <Building className="w-5 h-5" />, tooltip: "Şirket" },
-    { icon: <Crown className="w-5 h-5" />, tooltip: "Liderlik" },
-    { icon: <Gamepad2 className="w-5 h-5" />, tooltip: "Oyunlar" },
-    { icon: <Calendar className="w-5 h-5" />, tooltip: "Etkinlikler" }
+    {
+      icon: <User className="w-5 h-5" />,
+      name: "Profil Sistemi",
+      description: "Karakterini özelleştir ve gelişim sürecini takip et. Deneyim puanları, başarılar ve kişisel istatistiklerin."
+    },
+    {
+      icon: <Users className="w-5 h-5" />,
+      name: "Çete Yönetimi", 
+      description: "Güçlü çeteler kur, üyelerini yönet ve rakip çetelerle mücadele et. Liderlik yeteneklerini geliştir."
+    },
+    {
+      icon: <Shield className="w-5 h-5" />,
+      name: "Savunma Sistemi",
+      description: "Kendini ve mülklerini düşmanlardan koru. Gelişmiş güvenlik sistemleri ve koruma stratejileri."
+    },
+    {
+      icon: <Sword className="w-5 h-5" />,
+      name: "Saldırı Mekanikleri",
+      description: "Düşmanlarına saldır ve bölge kontrolü sağla. Taktiksel savaş planları ve güçlü silah koleksiyonları."
+    },
+    {
+      icon: <Target className="w-5 h-5" />,
+      name: "Hedef Sistemi",
+      description: "Stratejik hedefler belirle ve görevleri tamamla. Özel misyonlar ve büyük ödüllü operasyonlar."
+    },
+    {
+      icon: <Star className="w-5 h-5" />,
+      name: "Değerlendirme",
+      description: "Oyuncu performansını analiz et ve gelişim alanlarını keşfet. Detaylı istatistikler ve karşılaştırmalar."
+    },
+    {
+      icon: <Crosshair className="w-5 h-5" />,
+      name: "Silah Koleksiyonu",
+      description: "Geniş silah yelpazesi ve özel ekipmanlar. Nadir silahlar bul ve savaş gücünü artır."
+    },
+    {
+      icon: <Car className="w-5 h-5" />,
+      name: "Araç Garajı",
+      description: "Lüks arabalar satın al ve özelleştir. Hızlı kaçış araçları ve prestijli koleksiyonlar."
+    },
+    {
+      icon: <Briefcase className="w-5 h-5" />,
+      name: "İş Dünyası",
+      description: "Yasal ve yasadışı işlere gir, şirket kur ve gelir kaynaklarını çeşitlendir."
+    },
+    {
+      icon: <Home className="w-5 h-5" />,
+      name: "Emlak Sistemi",
+      description: "Evler, villalar ve gökdelenler satın al. Emlak imparatorluğunu genişlet ve kira geliri elde et."
+    },
+    {
+      icon: <ShoppingBag className="w-5 h-5" />,
+      name: "Market Alışverişi",
+      description: "Özel ürünler, ekipmanlar ve lüks eşyalar satın al. Nadir koleksiyonlar ve sınırlı teklifler."
+    },
+    {
+      icon: <Plane className="w-5 h-5" />,
+      name: "Seyahat Sistemi",
+      description: "11 şehir ve ilginç yerler keşfet. Dünyanın dört bir yanından hizmet, alışveriş ve dünya kültürünü deneyimle."
+    },
+    {
+      icon: <Building className="w-5 h-5" />,
+      name: "Şirket İmparatorluğu",
+      description: "Büyük şirketler kur ve sektör lideri ol. Ticaret ağları geliştir ve ekonomik güç kazan."
+    },
+    {
+      icon: <Crown className="w-5 h-5" />,
+      name: "Liderlik Rolleri",
+      description: "Çete liderliği ve bölge kontrolü. Stratejik kararlar al ve imparatorluğunu yönet."
+    },
+    {
+      icon: <Gamepad2 className="w-5 h-5" />,
+      name: "Mini Oyunlar",
+      description: "Eğlenceli mini oyunlar ve bonus aktiviteler. Kumar, yarış ve beceri testleri ile ek kazanç."
+    },
+    {
+      icon: <Calendar className="w-5 h-5" />,
+      name: "Etkinlik Takvimi",
+      description: "Özel etkinlikler, turnuvalar ve sezonluk aktiviteler. Sınırlı zamanlı ödüller ve prestijli yarışmalar."
+    }
   ];
 
   return (
@@ -619,32 +684,76 @@ const TopFeatures: React.FC = () => {
         Temel Özellikler
       </h3>
       
-      <div className="grid grid-cols-8 gap-3">
+      <div className="grid grid-cols-8 gap-3 mb-6">
         {features.map((feature, index) => (
           <div
             key={index}
-            className="bg-gray-700 hover:bg-gradient-to-br hover:from-orange-600/20 hover:to-red-600/20 p-2 rounded cursor-pointer transition-all duration-300 group relative border border-transparent hover:border-orange-500/30"
-            title={feature.tooltip}
+            onClick={() => setSelectedFeature(selectedFeature === index ? null : index)}
+            className={`
+              bg-gray-700/60 
+              hover:bg-gradient-to-br hover:from-orange-500/10 hover:to-red-500/10 
+              w-12 h-12
+              rounded-lg 
+              cursor-pointer 
+              transition-all duration-300 
+              group 
+              relative 
+              border
+              flex items-center justify-center
+              ${
+                selectedFeature === index 
+                  ? 'border-orange-400/40 bg-gradient-to-br from-orange-500/15 to-red-500/15 shadow-lg shadow-orange-500/10' 
+                  : 'border-gray-600/40 hover:border-orange-400/25 hover:shadow-md hover:shadow-orange-500/5'
+              }
+            `}
+            title={feature.name}
           >
-            <div className="text-gray-300 group-hover:text-orange-400 transition-colors">
+            <div className={`transition-colors ${
+              selectedFeature === index 
+                ? 'text-orange-300' 
+                : 'text-gray-300 group-hover:text-orange-300'
+            }`}>
               {feature.icon}
             </div>
           </div>
         ))}
       </div>
 
-      {/* Featured Section */}
-      <div className="mt-6 flex items-center space-x-4 bg-gradient-to-r from-gray-700/50 to-gray-800/50 p-4 rounded-lg border border-gray-600">
-        <div className="bg-gradient-to-br from-orange-500 to-red-500 p-3 rounded-lg shadow-lg">
-          <Plane className="w-8 h-8 text-white" />
+      {/* Selected Feature Description */}
+      {selectedFeature !== null && (
+        <div className="bg-gradient-to-r from-gray-700/40 to-gray-800/40 p-4 rounded-lg border border-gray-600/50 mb-4">
+          <div className="flex items-center space-x-4">
+            <div className="bg-gradient-to-br from-orange-500/80 to-red-500/80 p-3 rounded-lg shadow-lg">
+              <div className="text-white">
+                {features[selectedFeature].icon}
+              </div>
+            </div>
+            <div className="flex-1">
+              <h4 className="text-white font-bold mb-1">{features[selectedFeature].name}</h4>
+              <p className="text-gray-300 text-sm">
+                {features[selectedFeature].description}
+              </p>
+            </div>
+          </div>
         </div>
-        <div className="flex-1">
-          <h4 className="text-white font-bold mb-1">Seyahat Sistemi</h4>
-          <p className="text-gray-300 text-sm">
-            11 şehir ve ilginç yerler keşfet. Dünyanın dört bir yanından hizmet, alışveriş ve dünya kültürünü deneyimle.
-          </p>
+      )}
+
+      {/* Default Featured Section - Only show when no feature is selected */}
+      {selectedFeature === null && (
+        <div className="bg-gradient-to-r from-gray-700/40 to-gray-800/40 p-4 rounded-lg border border-gray-600/50">
+          <div className="flex items-center space-x-4">
+            <div className="bg-gradient-to-br from-orange-500/80 to-red-500/80 p-3 rounded-lg shadow-lg">
+              <Gamepad2 className="w-8 h-8 text-white" />
+            </div>
+            <div className="flex-1">
+              <h4 className="text-white font-bold mb-1">Özellikler Menüsü</h4>
+              <p className="text-gray-300 text-sm">
+                Yukarıdaki iconlara tıklayarak oyunun farklı özelliklerini keşfet ve detaylı açıklamaları görüntüle.
+              </p>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
@@ -763,7 +872,7 @@ const ClanRankings: React.FC = () => {
     <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg p-6 border border-gray-600 hover:border-orange-500/50 transition-all duration-300">
       <h3 className="text-white font-bold mb-4 flex items-center">
         <Users className="w-5 h-5 mr-2 text-orange-500" />
-        Clan Sıralamaları
+        ClanSıralamaları
       </h3>
       
       {/* Period Selection */}
@@ -871,116 +980,6 @@ const ClanRankings: React.FC = () => {
             <span>Savaş İlan Et</span>
           </span>
         </button>
-      </div>
-    </div>
-  );
-};
-
-// Enhanced Reviews Component
-const Reviews: React.FC = () => {
-  const reviews = [
-    {
-      rating: 5,
-      likes: 44,
-      text: "Bu arayüz mobil kullanım için mükemmel optimize edilmiş. Kesinlikle bu deneyimi kaçırmamanızı öneririm!",
-      author: "KatilKral",
-      date: "18 Eylül 2025"
-    },
-    {
-      rating: 5,
-      likes: 37,
-      text: "Grafikleri ve oyunun akışkanlığı gerçekten etkileyici. TORN'dan çok daha iyi!",
-      author: "MafiaBoss",
-      date: "15Eylül 2025"
-    },
-    {
-      rating: 4,
-      likes: 29,
-      text: "Türkçe dil desteği mükemmel. Sonunda kendi dilimizde oyun oynayabiliyoruz!",
-      author: "SilahDealer",
-      date: "12 Eylül 2025"
-    }
-  ];
-
-  const [currentReview, setCurrentReview] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentReview((prev) => (prev + 1) % reviews.length);
-    }, 4000);
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg p-6 border border-gray-600 hover:border-orange-500/50 transition-all duration-300">
-      <h3 className="text-white font-bold mb-4 flex items-center">
-        <Star className="w-5 h-5 mr-2 text-orange-500" />
-        Oyuncu Değerlendirmeleri
-      </h3>
-      
-      {/* Current Review */}
-      <div className="mb-6 bg-gray-700/50 p-4 rounded-lg border border-gray-600 min-h-[120px]">
-        <div className="flex items-center space-x-2 mb-2">
-          <div className="flex text-orange-500">
-            {[...Array(reviews[currentReview].rating)].map((_, i) => (
-              <Star key={i} className="w-4 h-4 fill-current" />
-            ))}
-          </div>
-          <span className="text-gray-400 text-sm flex items-center">
-            <Heart className="w-4 h-4 mr-1" />
-            {reviews[currentReview].likes} beğeni
-          </span>
-        </div>
-        <p className="text-gray-300 text-sm mb-3 leading-relaxed">
-          "{reviews[currentReview].text}"
-        </p>
-        <div className="text-xs text-gray-500">
-          - {reviews[currentReview].author} • {reviews[currentReview].date}
-        </div>
-      </div>
-
-      {/* Review Navigation Dots */}
-      <div className="flex justify-center space-x-2 mb-4">
-        {reviews.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => setCurrentReview(index)}
-            className={`w-2 h-2 rounded-full transition-colors ${
-              currentReview === index ? 'bg-orange-500' : 'bg-gray-600'
-            }`}
-          />
-        ))}
-      </div>
-
-      {/* Overall Rating */}
-      <div className="bg-gradient-to-r from-orange-600/20 to-red-600/20 p-4 rounded-lg border border-orange-500/30">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-orange-400 font-bold text-lg">4.8/5</span>
-          <div className="flex text-orange-500">
-            <Star className="w-5 h-5 fill-current" />
-            <Star className="w-5 h-5 fill-current" />
-            <Star className="w-5 h-5 fill-current" />
-            <Star className="w-5 h-5 fill-current" />
-            <Star className="w-5 h-5 fill-current" />
-          </div>
-        </div>
-        <div className="text-sm text-gray-300">2,847 oyuncu değerlendirmesi</div>
-      </div>
-
-      {/* Quick Stats */}
-      <div className="mt-4 grid grid-cols-3 gap-3 text-center">
-        <div className="bg-gray-700/30 rounded p-2">
-          <div className="text-green-400 font-bold text-lg">89%</div>
-          <div className="text-xs text-gray-400">Olumlu</div>
-        </div>
-        <div className="bg-gray-700/30 rounded p-2">
-          <div className="text-blue-400 font-bold text-lg">4.2K</div>
-          <div className="text-xs text-gray-400">Yorum</div>
-        </div>
-        <div className="bg-gray-700/30 rounded p-2">
-          <div className="text-purple-400 font-bold text-lg">95%</div>
-          <div className="text-xs text-gray-400">Tavsiye</div>
-        </div>
       </div>
     </div>
   );
@@ -1207,7 +1206,6 @@ function App() {
               <TopFeatures />
               <GlobalRank />
               <ClanRankings />
-              <Reviews />
             </div>
             
             {/* Right Column */}
