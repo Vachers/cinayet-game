@@ -64,8 +64,966 @@ import {
   ArrowLeft,
   UserCheck,
   CheckCircle2,
-  Info
+  Info,
+  Search,
+  Filter,
+  Pin,
+  MessageSquare,
+  ThumbsUp,
+  ThumbsDown,
+  Reply,
+  Quote,
+  Edit3,
+  Trash2,
+  AlertOctagon,
+  ChevronRight,
+  Bell,
+  Bookmark,
+  Share2,
+  MoreHorizontal,
+  FileText,
+  Hash,
+  Trending,
+  TrendingDown,
+  UserX,
+  Ban,
+  ShieldAlert,
+  Lock as LockIcon,
+  Unlock,
+  Megaphone,
+  Zap as LightningIcon,
+  Fire,
+  Ice,
+  Wind
 } from 'lucide-react';
+
+// Forum Page Component
+const ForumPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterType, setFilterType] = useState('all');
+  const [showNewTopicModal, setShowNewTopicModal] = useState(false);
+  const [sortBy, setSortBy] = useState('latest');
+
+  // Forum Categories Data
+  const categories = [
+    {
+      id: 'genel',
+      name: 'Genel Tartışmalar',
+      icon: <MessageCircle className="w-5 h-5" />,
+      description: 'Oyun hakkında genel konuşmalar',
+      topics: 2847,
+      posts: 45921,
+      lastPost: {
+        user: 'KartalAslan',
+        time: '5 dakika önce',
+        title: 'Yeni güncelleme hakkında'
+      },
+      color: 'text-blue-500',
+      bgColor: 'from-blue-600/10 to-blue-800/10',
+      borderColor: 'border-blue-500/30'
+    },
+    {
+      id: 'strateji',
+      name: 'Strateji & Taktikler',
+      icon: <Target className="w-5 h-5" />,
+      description: 'Savaş stratejileri ve oyun taktikleri',
+      topics: 1523,
+      posts: 28947,
+      lastPost: {
+        user: 'StratejiUstası',
+        time: '12 dakika önce',
+        title: 'En etkili saldırı planları'
+      },
+      color: 'text-orange-500',
+      bgColor: 'from-orange-600/10 to-orange-800/10',
+      borderColor: 'border-orange-500/30'
+    },
+    {
+      id: 'ceteler',
+      name: 'Çete Rekrutları',
+      icon: <Users className="w-5 h-5" />,
+      description: 'Çete arama, üye bulma ve ittifaklar',
+      topics: 892,
+      posts: 15647,
+      lastPost: {
+        user: 'ÇeteLideri',
+        time: '23 dakika önce',
+        title: 'Güçlü çete arıyor!'
+      },
+      color: 'text-purple-500',
+      bgColor: 'from-purple-600/10 to-purple-800/10',
+      borderColor: 'border-purple-500/30'
+    },
+    {
+      id: 'yardim',
+      name: 'Yardım & Destek',
+      icon: <HelpCircle className="w-5 h-5" />,
+      description: 'Teknik sorunlar ve oyun rehberi',
+      topics: 1247,
+      posts: 8934,
+      lastPost: {
+        user: 'DestekEkibi',
+        time: '1 saat önce',
+        title: 'Giriş sorunu çözümü'
+      },
+      color: 'text-green-500',
+      bgColor: 'from-green-600/10 to-green-800/10',
+      borderColor: 'border-green-500/30'
+    },
+    {
+      id: 'pazar',
+      name: 'Pazar Yeri',
+      icon: <ShoppingBag className="w-5 h-5" />,
+      description: 'Alım-satım ve ticaret',
+      topics: 687,
+      posts: 12456,
+      lastPost: {
+        user: 'TacirAhmet',
+        time: '45 dakika önce',
+        title: 'Nadir silah satışı'
+      },
+      color: 'text-yellow-500',
+      bgColor: 'from-yellow-600/10 to-yellow-800/10',
+      borderColor: 'border-yellow-500/30'
+    },
+    {
+      id: 'haberler',
+      name: 'Haberler & Duyurular',
+      icon: <Megaphone className="w-5 h-5" />,
+      description: 'Resmi duyurular ve güncellemeler',
+      topics: 234,
+      posts: 3892,
+      lastPost: {
+        user: 'AdminTeam',
+        time: '2 saat önce',
+        title: 'v2.4.1 Patch Notları'
+      },
+      color: 'text-red-500',
+      bgColor: 'from-red-600/10 to-red-800/10',
+      borderColor: 'border-red-500/30',
+      isOfficial: true
+    }
+  ];
+
+  // Sample Topics Data
+  const topics = [
+    {
+      id: '1',
+      title: 'Yeni silah sistemi hakkında görüşleriniz?',
+      author: 'SilahUzmani',
+      authorLevel: 42,
+      authorRank: 'Veteran',
+      replies: 156,
+      views: 2847,
+      lastReply: {
+        user: 'KatilMakinesi',
+        time: '3 dakika önce'
+      },
+      isPinned: true,
+      isHot: true,
+      category: 'genel',
+      tags: ['silah', 'güncelleme', 'öneri']
+    },
+    {
+      id: '2',
+      title: 'En güçlü çete hangisi? Tartışalım!',
+      author: 'ÇeteLideri99',
+      authorLevel: 38,
+      authorRank: 'Elite',
+      replies: 89,
+      views: 1456,
+      lastReply: {
+        user: 'KaraKartal',
+        time: '15 dakika önce'
+      },
+      isHot: true,
+      category: 'ceteler',
+      tags: ['çete', 'güç', 'sıralama']
+    },
+    {
+      id: '3',
+      title: '[SATILIK] Efsanevi AK-47 Ejder Nefesi',
+      author: 'SilahDealer',
+      authorLevel: 29,
+      authorRank: 'Trader',
+      replies: 23,
+      views: 892,
+      lastReply: {
+        user: 'ParaVarBurada',
+        time: '1 saat önce'
+      },
+      category: 'pazar',
+      tags: ['satış', 'silah', 'efsanevi']
+    },
+    {
+      id: '4',
+      title: 'Yeni oyuncular için başlangıç rehberi',
+      author: 'YardımcıAbi',
+      authorLevel: 67,
+      authorRank: 'Mentor',
+      replies: 234,
+      views: 5672,
+      lastReply: {
+        user: 'YeniOyuncu123',
+        time: '30 dakika önce'
+      },
+      isPinned: true,
+      category: 'yardim',
+      tags: ['rehber', 'başlangıç', 'yardım']
+    }
+  ];
+
+  // Online Users Data
+  const onlineUsers = [
+    { name: 'AdminBoss', level: 100, status: 'online', role: 'admin' },
+    { name: 'ModKral', level: 85, status: 'online', role: 'moderator' },
+    { name: 'VeteranAsker', level: 72, status: 'online', role: 'veteran' },
+    { name: 'ÇeteReisi', level: 58, status: 'idle', role: 'member' },
+    { name: 'SavaşÇı', level: 44, status: 'online', role: 'member' }
+  ];
+
+  // Category View
+  if (selectedCategory && !selectedTopic) {
+    const category = categories.find(c => c.id === selectedCategory);
+    const categoryTopics = topics.filter(t => t.category === selectedCategory);
+
+    return (
+      <div className="min-h-screen bg-gray-900">
+        {/* Header */}
+        <header className="bg-gray-900/95 backdrop-blur-sm border-b border-gray-700 sticky top-0 z-50">
+          <div className="max-w-7xl mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <button 
+                  onClick={() => setSelectedCategory(null)}
+                  className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors group"
+                >
+                  <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+                  <span>Forum Ana Sayfa</span>
+                </button>
+                
+                <ChevronRight className="w-4 h-4 text-gray-500" />
+                
+                <div className="flex items-center space-x-3">
+                  <div className={category?.color}>
+                    {category?.icon}
+                  </div>
+                  <h1 className="text-xl font-bold text-white">{category?.name}</h1>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-4">
+                <button 
+                  onClick={() => setShowNewTopicModal(true)}
+                  className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105"
+                >
+                  <span className="flex items-center space-x-2">
+                    <Edit3 className="w-4 h-4" />
+                    <span>Yeni Konu</span>
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Category Content */}
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            
+            {/* Main Content */}
+            <div className="lg:col-span-3 space-y-6">
+              
+              {/* Category Info */}
+              <div className={`bg-gradient-to-r ${category?.bgColor} rounded-lg border ${category?.borderColor} p-6`}>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-4">
+                    <div className={`p-3 rounded-lg bg-black/20 ${category?.color}`}>
+                      {category?.icon}
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-white">{category?.name}</h2>
+                      <p className="text-gray-300">{category?.description}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="text-right">
+                    <div className="text-white font-bold text-lg">{category?.topics.toLocaleString()}</div>
+                    <div className="text-gray-400 text-sm">Konu</div>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div>
+                    <div className="text-white font-bold text-xl">{category?.topics.toLocaleString()}</div>
+                    <div className="text-gray-400 text-sm">Konular</div>
+                  </div>
+                  <div>
+                    <div className="text-white font-bold text-xl">{category?.posts.toLocaleString()}</div>
+                    <div className="text-gray-400 text-sm">Mesajlar</div>
+                  </div>
+                  <div>
+                    <div className="text-white font-bold text-xl">2.1K</div>
+                    <div className="text-gray-400 text-sm">Takipçi</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Search & Filters */}
+              <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-600 p-4">
+                <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0 md:space-x-4">
+                  <div className="flex items-center space-x-4 w-full md:w-auto">
+                <div className="relative flex-1 md:w-64">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        type="text"
+                        placeholder="Konularda ara..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                      />
+                    </div>
+                    
+                    <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value)}
+                      className="px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                    >
+                      <option value="latest">En Son</option>
+                      <option value="popular">En Popüler</option>
+                      <option value="replies">En Çok Yanıt</option>
+                      <option value="views">En Çok Görüntülenme</option>
+                    </select>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <button className="px-3 py-2 bg-orange-600/20 text-orange-400 border border-orange-500/30 rounded-lg hover:bg-orange-600/30 transition-colors">
+                      <Filter className="w-4 h-4" />
+                    </button>
+                    <button className="px-3 py-2 bg-gray-700/50 text-gray-400 border border-gray-600 rounded-lg hover:bg-gray-600 transition-colors">
+                      <Bell className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Topics List */}
+              <div className="space-y-4">
+                {categoryTopics.map((topic) => (
+                  <div
+                    key={topic.id}
+                    onClick={() => setSelectedTopic(topic.id)}
+                    className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-600 hover:border-orange-500/50 p-6 transition-all duration-300 cursor-pointer group"
+                  >
+                    <div className="flex items-start space-x-4">
+                      
+                      {/* Topic Icon & Status */}
+                      <div className="flex flex-col items-center space-y-2">
+                        {topic.isPinned ? (
+                          <div className="p-2 bg-orange-600/20 rounded-lg border border-orange-500/30">
+                            <Pin className="w-5 h-5 text-orange-400" />
+                          </div>
+                        ) : topic.isHot ? (
+                          <div className="p-2 bg-red-600/20 rounded-lg border border-red-500/30">
+                            <Flame className="w-5 h-5 text-red-400" />
+                          </div>
+                        ) : (
+                          <div className="p-2 bg-gray-700/50 rounded-lg border border-gray-600">
+                            <MessageSquare className="w-5 h-5 text-gray-400" />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Topic Content */}
+                      <div className="flex-1 min-w-0">
+                        
+                        {/* Title & Tags */}
+                        <div className="mb-3">
+                          <h3 className="text-white font-bold text-lg group-hover:text-orange-400 transition-colors mb-2">
+                            {topic.title}
+                          </h3>
+                          <div className="flex items-center space-x-2">
+                            {topic.tags.map((tag, index) => (
+                              <span
+                                key={index}
+                                className="px-2 py-1 bg-gray-700/50 text-gray-400 text-xs rounded-md"
+                              >
+                                #{tag}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Author Info */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                              {topic.author.charAt(0)}
+                            </div>
+                            <div>
+                              <div className="flex items-center space-x-2">
+                                <span className="text-white font-medium">{topic.author}</span>
+                                <span className="px-2 py-0.5 bg-orange-600/20 text-orange-400 text-xs rounded">
+                                  Lvl {topic.authorLevel}
+                                </span>
+                                <span className="px-2 py-0.5 bg-purple-600/20 text-purple-400 text-xs rounded">
+                                  {topic.authorRank}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Last Reply */}
+                          <div className="text-right">
+                            <div className="text-gray-400 text-sm">
+                              Son yanıt: <span className="text-white">{topic.lastReply.user}</span>
+                            </div>
+                            <div className="text-gray-500 text-xs">{topic.lastReply.time}</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Stats */}
+                      <div className="flex flex-col items-center space-y-4 text-center min-w-0">
+                        <div>
+                          <div className="text-white font-bold text-lg">{topic.replies}</div>
+                          <div className="text-gray-400 text-sm">Yanıt</div>
+                        </div>
+                        <div>
+                          <div className="text-white font-bold text-lg">{topic.views.toLocaleString()}</div>
+                          <div className="text-gray-400 text-sm">Görüntülenme</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Load More */}
+              <div className="text-center">
+                <button className="bg-gray-800/80 hover:bg-gray-700/80 text-white px-6 py-3 rounded-lg border border-gray-600 hover:border-gray-500 transition-all duration-300">
+                  Daha Fazla Konu Yükle
+                </button>
+              </div>
+            </div>
+
+            {/* Sidebar */}
+            <div className="space-y-6">
+              
+              {/* Category Stats */}
+              <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-600 p-6">
+                <h3 className="text-white font-bold mb-4 flex items-center">
+                  <Activity className="w-5 h-5 mr-2 text-orange-500" />
+                  Kategori İstatistikleri
+                </h3>
+                
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-400">Toplam Konu</span>
+                    <span className="text-white font-bold">{category?.topics.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-400">Toplam Mesaj</span>
+                    <span className="text-white font-bold">{category?.posts.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-400">Bugün Yeni</span>
+                    <span className="text-green-400 font-bold">+47</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-400">Bu Hafta</span>
+                    <span className="text-blue-400 font-bold">+312</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Active Users */}
+              <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-600 p-6">
+                <h3 className="text-white font-bold mb-4 flex items-center">
+                  <Users className="w-5 h-5 mr-2 text-orange-500" />
+                  Aktif Kullanıcılar
+                </h3>
+                
+                <div className="space-y-3">
+                  {onlineUsers.map((user, index) => (
+                    <div key={index} className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="relative">
+                          <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                            {user.name.charAt(0)}
+                          </div>
+                          <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-gray-800 ${
+                            user.status === 'online' ? 'bg-green-500' : 'bg-yellow-500'
+                          }`}></div>
+                        </div>
+                        <div>
+                          <div className={`font-medium text-sm ${
+                            user.role === 'admin' ? 'text-red-400' :
+                            user.role === 'moderator' ? 'text-blue-400' :
+                            user.role === 'veteran' ? 'text-purple-400' :
+                            'text-white'
+                          }`}>
+                            {user.name}
+                          </div>
+                          <div className="text-gray-400 text-xs">Lvl {user.level}</div>
+                        </div>
+                      </div>
+                      
+                      {user.role === 'admin' && (
+                        <Crown className="w-4 h-4 text-red-400" />
+                      )}
+                      {user.role === 'moderator' && (
+                        <Shield className="w-4 h-4 text-blue-400" />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-600 p-6">
+                <h3 className="text-white font-bold mb-4">Hızlı İşlemler</h3>
+                
+                <div className="space-y-3">
+                  <button className="w-full bg-gradient-to-r from-orange-600/20 to-red-600/20 hover:from-orange-600/30 hover:to-red-600/30 text-orange-400 py-3 px-4 rounded-lg border border-orange-500/30 hover:border-orange-500/50 transition-all duration-300">
+                    <span className="flex items-center justify-center space-x-2">
+                      <Bell className="w-4 h-4" />
+                      <span>Kategoriyi Takip Et</span>
+                    </span>
+                  </button>
+                  
+                  <button className="w-full bg-gray-700/50 hover:bg-gray-600/50 text-white py-3 px-4 rounded-lg border border-gray-600 hover:border-gray-500 transition-all duration-300">
+                    <span className="flex items-center justify-center space-x-2">
+                      <Bookmark className="w-4 h-4" />
+                      <span>Favorilere Ekle</span>
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Main Forum View
+  return (
+    <div className="min-h-screen bg-gray-900">
+      
+      {/* Header */}
+      <header className="bg-gray-900/95 backdrop-blur-sm border-b border-gray-700 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <button 
+                onClick={onBack}
+                className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors group"
+              >
+                <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+                <span>Ana Sayfaya Dön</span>
+              </button>
+              
+              <div className="text-2xl font-bold text-white tracking-wider font-mono">
+                CİNAYET FORUM
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Forum'da ara..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-64 pl-10 pr-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                />
+              </div>
+              
+              <button className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105">
+                <span className="flex items-center space-x-2">
+                  <Edit3 className="w-4 h-4" />
+                  <span>Yeni Konu</span>
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <section className="relative py-16 overflow-hidden">
+        <div className="absolute inset-0">
+          <img 
+            src="https://images.pexels.com/photos/1103970/pexels-photo-1103970.jpeg?auto=compress&cs=tinysrgb&w=1920&h=600&fit=crop"
+            alt="Forum Background"
+            className="w-full h-full object-cover opacity-30"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-gray-900/90 via-gray-900/80 to-gray-900/90"></div>
+        </div>
+        
+        <div className="relative z-10 max-w-7xl mx-auto px-4 text-center">
+          <div className="inline-flex items-center space-x-3 bg-gradient-to-r from-red-600/20 to-orange-600/20 border border-orange-500/50 rounded-full px-6 py-3 backdrop-blur-sm mb-6">
+            <MessageCircle className="w-6 h-6 text-orange-500" />
+            <span className="text-orange-300 font-bold">TÜRKİYE'NİN EN BÜYÜK OYUNCU TOPLULUĞU</span>
+            <Users className="w-6 h-6 text-red-500" />
+          </div>
+          
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            CİNAYET FORUM
+          </h1>
+          <p className="text-xl text-gray-300 mb-8">
+            80,000+ oyuncuyla birlikte stratejilerinizi paylaşın, çete kurun ve imparatorluğunuzu büyütün
+          </p>
+          
+          {/* Quick Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-2xl mx-auto">
+            {[
+              { label: "Toplam Üye", value: "80.2K", icon: <Users className="w-6 h-6" /> },
+              { label: "Çevrimiçi", value: "12.5K", icon: <Activity className="w-6 h-6" /> },
+              { label: "Konular", value: "45.8K", icon: <MessageSquare className="w-6 h-6" /> },
+              { label: "Mesajlar", value: "1.2M", icon: <MessageCircle className="w-6 h-6" /> }
+            ].map((stat, index) => (
+              <div key={index} className="bg-gray-800/60 backdrop-blur-sm rounded-lg p-4 border border-gray-600">
+                <div className="text-orange-400 mb-2 flex justify-center">
+                  {stat.icon}
+                </div>
+                <div className="text-white font-bold text-lg">{stat.value}</div>
+                <div className="text-gray-400 text-sm">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          
+          {/* Categories List */}
+          <div className="lg:col-span-3">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl font-bold text-white">Forum Kategorileri</h2>
+              
+              <div className="flex items-center space-x-3">
+                <select
+                  value={filterType}
+                  onChange={(e) => setFilterType(e.target.value)}
+                  className="px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                >
+                  <option value="all">Tüm Kategoriler</option>
+                  <option value="active">Aktif</option>
+                  <option value="official">Resmi</option>
+                  <option value="popular">Popüler</option>
+                </select>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              {categories.map((category) => (
+                <div
+                  key={category.id}
+                  onClick={() => setSelectedCategory(category.id)}
+                  className={`bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-600 hover:border-orange-500/50 p-6 transition-all duration-300 cursor-pointer group ${
+                    category.isOfficial ? 'ring-2 ring-red-500/20' : ''
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    
+                    {/* Category Info */}
+                    <div className="flex items-center space-x-4 flex-1">
+                      <div className={`p-4 rounded-lg bg-gradient-to-r ${category.bgColor} border ${category.borderColor}`}>
+                        <div className={category.color}>
+                          {category.icon}
+                        </div>
+                      </div>
+                      
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3 mb-2">
+                          <h3 className="text-white font-bold text-lg group-hover:text-orange-400 transition-colors">
+                            {category.name}
+                          </h3>
+                          {category.isOfficial && (
+                            <div className="bg-red-600/20 text-red-400 px-2 py-1 rounded text-xs font-bold border border-red-500/30">
+                              RESMİ
+                            </div>
+                          )}
+                        </div>
+                        <p className="text-gray-400 mb-3">{category.description}</p>
+                        
+                        {/* Last Post */}
+                        <div className="flex items-center space-x-2 text-sm">
+                          <span className="text-gray-500">Son mesaj:</span>
+                          <span className="text-white font-medium">{category.lastPost.user}</span>
+                          <span className="text-gray-500">•</span>
+                          <span className="text-gray-400">{category.lastPost.time}</span>
+                        </div>
+                        <div className="text-gray-300 text-sm truncate">{category.lastPost.title}</div>
+                      </div>
+                    </div>
+
+                    {/* Stats */}
+                    <div className="flex items-center space-x-8 text-center">
+                      <div>
+                        <div className="text-white font-bold text-xl">{category.topics.toLocaleString()}</div>
+                        <div className="text-gray-400 text-sm">Konu</div>
+                      </div>
+                      <div>
+                        <div className="text-white font-bold text-xl">{category.posts.toLocaleString()}</div>
+                        <div className="text-gray-400 text-sm">Mesaj</div>
+                      </div>
+                      <div className="text-gray-400">
+                        <ChevronRight className="w-5 h-5 group-hover:text-orange-400 group-hover:translate-x-1 transition-all duration-300" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            
+            {/* Forum Stats */}
+            <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-600 p-6">
+              <h3 className="text-white font-bold mb-4 flex items-center">
+                <Trophy className="w-5 h-5 mr-2 text-orange-500" />
+                Forum İstatistikleri
+              </h3>
+              
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400">Toplam Üye</span>
+                  <span className="text-white font-bold">80.247</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400">Çevrimiçi</span>
+                  <span className="text-green-400 font-bold">12.507</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400">Bugün Kayıt</span>
+                  <span className="text-blue-400 font-bold">+156</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400">En Çok Çevrimiçi</span>
+                  <span className="text-yellow-400 font-bold">18.394</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Top Contributors */}
+            <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-600 p-6">
+              <h3 className="text-white font-bold mb-4 flex items-center">
+                <Star className="w-5 h-5 mr-2 text-orange-500" />
+                En Aktif Üyeler
+              </h3>
+              
+              <div className="space-y-3">
+                {[
+                  { name: 'ForumKralı', posts: 15420, level: 89, trend: '+127' },
+                  { name: 'MesajUstası', posts: 12856, level: 76, trend: '+89' },
+                  { name: 'TartışmacıAbi', posts: 9874, level: 68, trend: '+64' },
+                  { name: 'BilgiYayıcı', posts: 8456, level: 59, trend: '+45' },
+                  { name: 'YardımSever', posts: 7234, level: 54, trend: '+38' }
+                ].map((user, index) => (
+                  <div key={index} className={`flex items-center justify-between p-3 rounded-lg ${
+                    index === 0 ? 'bg-orange-600/10 border border-orange-500/20' :
+                    index === 1 ? 'bg-gray-600/10 border border-gray-500/20' :
+                    index === 2 ? 'bg-amber-600/10 border border-amber-500/20' :
+                    'bg-gray-700/30'
+                  }`}>
+                    <div className="flex items-center space-x-3">
+                      <div className={`text-sm font-bold ${
+                        index === 0 ? 'text-orange-500' : 
+                        index === 1 ? 'text-gray-300' : 
+                        index === 2 ? 'text-amber-600' : 
+                        'text-gray-400'
+                      }`}>
+                        #{index + 1}
+                      </div>
+                      <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                        {user.name.charAt(0)}
+                      </div>
+                      <div>
+                        <div className="text-white font-medium text-sm">{user.name}</div>
+                        <div className="text-gray-400 text-xs">Lvl {user.level}</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-white font-bold text-sm">{user.posts.toLocaleString()}</div>
+                      <div className="text-green-400 text-xs">{user.trend}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Recent Activity */}
+            <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-600 p-6">
+              <h3 className="text-white font-bold mb-4 flex items-center">
+                <Clock className="w-5 h-5 mr-2 text-orange-500" />
+                Son Aktiviteler
+              </h3>
+              
+              <div className="space-y-3">
+                {[
+                  { user: 'YeniÜye123', action: 'forma katıldı', time: '2 dakika önce', type: 'join' },
+                  { user: 'ÇeteReisi', action: 'yeni konu açtı', time: '5 dakika önce', type: 'topic' },
+                  { user: 'SavaşçıKral', action: 'mesaj yazdı', time: '8 dakika önce', type: 'reply' },
+                  { user: 'AdminEkip', action: 'duyuru yayınladı', time: '15 dakika önce', type: 'announcement' },
+                  { user: 'VeteranAsker', action: 'konuyu beğendi', time: '23 dakika önce', type: 'like' }
+                ].map((activity, index) => (
+                  <div key={index} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-700/30 transition-colors">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                      activity.type === 'join' ? 'bg-green-600/20 text-green-400' :
+                      activity.type === 'topic' ? 'bg-blue-600/20 text-blue-400' :
+                      activity.type === 'reply' ? 'bg-purple-600/20 text-purple-400' :
+                      activity.type === 'announcement' ? 'bg-red-600/20 text-red-400' :
+                      'bg-yellow-600/20 text-yellow-400'
+                    }`}>
+                      {activity.type === 'join' ? <UserPlus className="w-4 h-4" /> :
+                       activity.type === 'topic' ? <MessageSquare className="w-4 h-4" /> :
+                       activity.type === 'reply' ? <Reply className="w-4 h-4" /> :
+                       activity.type === 'announcement' ? <Megaphone className="w-4 h-4" /> :
+                       <ThumbsUp className="w-4 h-4" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-white text-sm">
+                        <span className="font-medium">{activity.user}</span> {activity.action}
+                      </div>
+                      <div className="text-gray-500 text-xs">{activity.time}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Quick Links */}
+            <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-600 p-6">
+              <h3 className="text-white font-bold mb-4">Hızlı Bağlantılar</h3>
+              
+              <div className="space-y-2">
+                <button className="w-full text-left text-gray-300 hover:text-orange-400 py-2 px-3 rounded-lg hover:bg-gray-700/30 transition-all duration-200 flex items-center space-x-2">
+                  <FileText className="w-4 h-4" />
+                  <span>Forum Kuralları</span>
+                </button>
+                <button className="w-full text-left text-gray-300 hover:text-orange-400 py-2 px-3 rounded-lg hover:bg-gray-700/30 transition-all duration-200 flex items-center space-x-2">
+                  <HelpCircle className="w-4 h-4" />
+                  <span>SSS</span>
+                </button>
+                <button className="w-full text-left text-gray-300 hover:text-orange-400 py-2 px-3 rounded-lg hover:bg-gray-700/30 transition-all duration-200 flex items-center space-x-2">
+                  <Users className="w-4 h-4" />
+                  <span>Moderatör Ekibi</span>
+                </button>
+                <button className="w-full text-left text-gray-300 hover:text-orange-400 py-2 px-3 rounded-lg hover:bg-gray-700/30 transition-all duration-200 flex items-center space-x-2">
+                  <Mail className="w-4 h-4" />
+                  <span>İletişim</span>
+                </button>
+                <button className="w-full text-left text-gray-300 hover:text-orange-400 py-2 px-3 rounded-lg hover:bg-gray-700/30 transition-all duration-200 flex items-center space-x-2">
+                  <Settings className="w-4 h-4" />
+                  <span>Forum Ayarları</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Discord Integration */}
+            <div className="bg-gradient-to-r from-indigo-900/20 to-purple-900/20 rounded-lg border border-indigo-500/30 p-6">
+              <h3 className="text-white font-bold mb-4 flex items-center">
+                <MessageCircle className="w-5 h-5 mr-2 text-indigo-400" />
+                Discord Sunucumuz
+              </h3>
+              
+              <p className="text-gray-300 text-sm mb-4">
+                Anlık sohbet için Discord sunucumuza katılın! 24/7 aktif topluluk.
+              </p>
+              
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  <span className="text-white font-bold">8,247</span>
+                  <span className="text-gray-400 text-sm">çevrimiçi</span>
+                </div>
+                <div className="text-gray-400 text-sm">21,456 üye</div>
+              </div>
+              
+              <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-4 rounded-lg font-medium transition-colors">
+                Discord'a Katıl
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <footer className="bg-gray-900/95 backdrop-blur-sm border-t border-gray-700 py-8 mt-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            
+            {/* Forum Info */}
+            <div>
+              <div className="text-2xl font-bold text-white tracking-wider font-mono mb-4">
+                CİNAYET FORUM
+              </div>
+              <p className="text-gray-400 text-sm leading-relaxed mb-4">
+                Türkiye'nin en büyük suç oyunu topluluğu. Stratejilerinizi paylaşın, 
+                arkadaşlıklar kurun ve imparatorluğunuzu büyütün.
+              </p>
+              <div className="flex items-center space-x-4">
+                <div className="text-white font-bold">80,247</div>
+                <div className="text-gray-400 text-sm">Kayıtlı Üye</div>
+              </div>
+            </div>
+
+            {/* Quick Stats */}
+            <div>
+              <h4 className="text-white font-bold mb-4">Forum İstatistikleri</h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <div className="text-orange-400 font-bold text-lg">45.8K</div>
+                  <div className="text-gray-400 text-xs">Konular</div>
+                </div>
+                <div>
+                  <div className="text-red-400 font-bold text-lg">1.2M</div>
+                  <div className="text-gray-400 text-xs">Mesajlar</div>
+                </div>
+                <div>
+                  <div className="text-green-400 font-bold text-lg">12.5K</div>
+                  <div className="text-gray-400 text-xs">Çevrimiçi</div>
+                </div>
+                <div>
+                  <div className="text-blue-400 font-bold text-lg">156</div>
+                  <div className="text-gray-400 text-xs">Bugün Yeni</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Links */}
+            <div>
+              <h4 className="text-white font-bold mb-4">Bağlantılar</h4>
+              <ul className="space-y-2 text-sm">
+                <li><a href="#" className="text-gray-400 hover:text-orange-400 transition-colors">Ana Sayfa</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-orange-400 transition-colors">Oyuna Giriş</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-orange-400 transition-colors">Kayıt Ol</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-orange-400 transition-colors">Forum Kuralları</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-orange-400 transition-colors">Gizlilik Politikası</a></li>
+              </ul>
+            </div>
+          </div>
+          
+          <div className="border-t border-gray-700 pt-6 mt-8 text-center">
+            <div className="text-gray-400 text-sm">
+              © 2014-2025 CİNAYET FORUM. Tüm hakları saklıdır. | Made with ❤️ for Turkish gamers
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+};
 
 // Registration Page Component
 const RegistrationPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
@@ -344,7 +1302,7 @@ const RegistrationPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                           }`}
                           placeholder="Kullanıcı adınızı girin"
                         />
-                {formData.username && !errors.username && (
+                        {formData.username && !errors.username && (
                           <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
                             <CheckCircle2 className="h-5 w-5 text-green-400" />
                           </div>
@@ -813,7 +1771,7 @@ const RegistrationPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 };
 
 // Header Navigation Component
-const Header: React.FC<{ onRegisterClick: () => void }> = ({ onRegisterClick }) => {
+const Header: React.FC<{ onRegisterClick: () => void; onForumClick: () => void }> = ({ onRegisterClick, onForumClick }) => {
   return (
     <header className="bg-gray-900/95 backdrop-blur-sm border-b-2 border-orange-500 fixed w-full top-0 z-50">
       <div className="max-w-7xl mx-auto px-4">
@@ -826,7 +1784,7 @@ const Header: React.FC<{ onRegisterClick: () => void }> = ({ onRegisterClick }) 
           {/* Navigation */}
           <nav className="hidden md:flex space-x-6">
             <button onClick={onRegisterClick} className="text-gray-300 hover:text-white transition-colors">Kayıt Ol</button>
-            <a href="#" className="text-gray-300 hover:text-white transition-colors">Forum</a>
+            <button onClick={onForumClick} className="text-gray-300 hover:text-white transition-colors">Forum</button>
             <a href="#" className="text-gray-300 hover:text-white transition-colors">Haberler</a>
             <a href="#" className="text-gray-300 hover:text-white transition-colors">Wiki</a>
             <a href="#" className="text-gray-300 hover:text-white transition-colors">Kurallar</a>
@@ -1440,7 +2398,8 @@ const TopFeatures: React.FC = () => {
     }
   ];
 
-  return (<div className="bg-gray-800/80 backdrop-blur-sm rounded-lg p-6 border border-gray-600 hover:border-orange-500/50 transition-all duration-300">
+  return (
+    <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg p-6 border border-gray-600 hover:border-orange-500/50 transition-all duration-300">
       <h3 className="text-white font-bold mb-4 flex items-center">
         <Gamepad2 className="w-5 h-5 mr-2 text-orange-500" />
         Temel Özellikler
@@ -1739,7 +2698,7 @@ const ClanRankings: React.FC = () => {
         <button className="bg-gradient-to-r from-red-600/20 to-orange-600/20 hover:from-red-600/30 hover:to-orange-600/30 text-red-400 py-3 px-4 rounded-lg font-bold transition-all duration-300 border border-red-500/30 hover:border-red-500/50 text-xs">
           <span className="flex items-center justify-center space-x-2">
             <Sword className="w-4 h-4" />
-            <span>Savaşİlan Et</span>
+            <span>Savaş İlan Et</span>
           </span>
         </button>
       </div>
@@ -1818,7 +2777,7 @@ const TextBasedGames: React.FC = () => {
       </h3>
       
       <p className="text-gray-300 text-sm mb-4 leading-relaxed">
-        Cinayet heyecan verici, gerçek rol tabanlıoyundur. Metin tabanlı oyunlar 
+        Cinayet heyecan verici, gerçek rol tabanlı oyundur. Metin tabanlı oyunlar 
         bağımlılık yaratır ve oynaması eğlencelidir. Cinayet bu konudadır!
       </p>
       
@@ -1897,8 +2856,7 @@ const FooterBar: React.FC = () => {
               CİNAYET
             </div>
             <p className="text-gray-400 text-sm leading-relaxed mb-4">
-              Türkiye'nin en büyük ve en heyecan verici browser tabanlı suç oyunu. 
-              80.000'den fazla aktif oyuncuyla birlikte suç dünyasının karanlık sokaklarında 
+              Türkiye'nin en büyük ve en heyecan verici browser tabanlı suç oyunu.80.000'den fazla aktif oyuncuyla birlikte suç dünyasının karanlık sokaklarında 
               imparatorluğunu kur.
             </p>
             <div className="flex items-center space-x-4">
@@ -1944,22 +2902,34 @@ const FooterBar: React.FC = () => {
 
 function App() {
   const [showRegistration, setShowRegistration] = useState(false);
+  const [showForum, setShowForum] = useState(false);
 
   const handleRegisterClick = () => {
     setShowRegistration(true);
+    setShowForum(false);
+  };
+
+  const handleForumClick = () => {
+    setShowForum(true);
+    setShowRegistration(false);
   };
 
   const handleBackToHome = () => {
     setShowRegistration(false);
+    setShowForum(false);
   };
 
   if (showRegistration) {
     return <RegistrationPage onBack={handleBackToHome} />;
   }
 
+  if (showForum) {
+    return <ForumPage onBack={handleBackToHome} />;
+  }
+
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      <Header onRegisterClick={handleRegisterClick} />
+      <Header onRegisterClick={handleRegisterClick} onForumClick={handleForumClick} />
       
       {/* Hero Section */}
       <HeroSection onRegisterClick={handleRegisterClick} />
