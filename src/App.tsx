@@ -53,11 +53,767 @@ import {
   HardDrive,
   Monitor,
   Gauge,
-  Swords
+  Swords,
+  Mail,
+  EyeOff,
+  Check,
+  X,
+  AlertCircle,
+  KeyRound,
+  Calendar as CalendarIcon,
+  ArrowLeft,
+  UserCheck,
+  CheckCircle2,
+  Info
 } from 'lucide-react';
 
+// Registration Page Component
+const RegistrationPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    birthDate: '',
+    gender: '',
+    country: 'Turkey',
+    city: '',
+    agreeTerms: false,
+    agreeNewsletter: false
+  });
+
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [passwordStrength, setPasswordStrength] = useState(0);
+
+  const turkishCities = [
+    'İstanbul', 'Ankara', 'İzmir', 'Bursa', 'Antalya', 'Adana', 'Konya', 
+    'Şanlıurfa', 'Gaziantep', 'Kocaeli', 'Mersin', 'Diyarbakır', 'Hatay',
+    'Manisa', 'Kayseri', 'Samsun', 'Balıkesir', 'Kahramanmaraş', 'Van',
+    'Aydın', 'Denizli', 'Sakarya', 'Muğla', 'Eskişehir', 'Tekirdağ'
+  ];
+
+  const calculatePasswordStrength = (password: string) => {
+    let strength = 0;
+    if (password.length >= 8) strength += 25;
+    if (/[A-Z]/.test(password)) strength += 25;
+    if (/[0-9]/.test(password)) strength += 25;
+    if (/[^A-Za-z0-9]/.test(password)) strength += 25;
+    return strength;
+  };
+
+  useEffect(() => {
+    setPasswordStrength(calculatePasswordStrength(formData.password));
+  }, [formData.password]);
+
+  const validateField = (name: string, value: string) => {
+    const newErrors = { ...errors };
+
+    switch (name) {
+      case 'username':
+        if (!value) {
+          newErrors.username = 'Kullanıcı adı gereklidir';
+        } else if (value.length < 3) {
+          newErrors.username = 'Kullanıcı adı en az 3 karakter olmalıdır';
+        } else if (value.length > 20) {
+          newErrors.username = 'Kullanıcı adı en fazla 20 karakter olmalıdır';
+        } else if (!/^[a-zA-Z0-9_]+$/.test(value)) {
+          newErrors.username = 'Sadece harf, rakam ve alt çizgi kullanabilirsiniz';
+        } else {
+          delete newErrors.username;
+        }
+        break;
+
+      case 'email':
+        if (!value) {
+          newErrors.email = 'E-posta adresi gereklidir';
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          newErrors.email = 'Geçerli bir e-posta adresi giriniz';
+        } else {
+          delete newErrors.email;
+        }
+        break;
+
+      case 'password':
+        if (!value) {
+          newErrors.password = 'Şifre gereklidir';
+        } else if (value.length < 8) {
+          newErrors.password = 'Şifre en az 8 karakter olmalıdır';
+        } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(value)) {
+          newErrors.password = 'Şifre büyük harf, küçük harf ve rakam içermelidir';
+        } else {
+          delete newErrors.password;
+        }
+        break;
+
+      case 'confirmPassword':
+        if (!value) {
+          newErrors.confirmPassword = 'Şifre tekrarı gereklidir';
+        } else if (value !== formData.password) {
+          newErrors.confirmPassword = 'Şifreler eşleşmiyor';
+        } else {
+          delete newErrors.confirmPassword;
+        }
+        break;
+
+      case 'birthDate':
+        if (!value) {
+          newErrors.birthDate = 'Doğum tarihi gereklidir';
+        } else {
+          const birthYear = new Date(value).getFullYear();
+          const currentYear = new Date().getFullYear();
+          const age = currentYear - birthYear;
+          if (age < 13) {
+            newErrors.birthDate = 'En az 13 yaşında olmalısınız';
+          } else if (age > 100) {
+            newErrors.birthDate = 'Geçerli bir doğum tarihi giriniz';
+          } else {
+            delete newErrors.birthDate;
+          }
+        }
+        break;
+
+      default:
+        break;
+    }
+
+    setErrors(newErrors);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
+    const checked = type === 'checkbox' ? (e.target as HTMLInputElement).checked : undefined;
+
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+
+    if (type !== 'checkbox') {
+      validateField(name, value);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    // Validate all fields
+    Object.keys(formData).forEach(key => {
+      if (key !== 'agreeTerms' && key !== 'agreeNewsletter') {
+        validateField(key, formData[key as keyof typeof formData] as string);
+      }
+    });
+
+    // Check terms agreement
+    if (!formData.agreeTerms) {
+      setErrors(prev => ({ ...prev, agreeTerms: 'Kullanım şartlarını kabul etmelisiniz' }));
+    }
+
+    // Simulate API call
+    setTimeout(() => {
+      setIsSubmitting(false);
+      // Handle success
+      alert('Kayıt başarılı! Hoş geldiniz!');
+    }, 2000);
+  };
+
+  const getPasswordStrengthColor = () => {
+    if (passwordStrength < 25) return 'bg-red-500';
+    if (passwordStrength < 50) return 'bg-orange-500';
+    if (passwordStrength < 75) return 'bg-yellow-500';
+    return 'bg-green-500';
+  };
+
+  const getPasswordStrengthText = () => {
+    if (passwordStrength < 25) return 'Zayıf';
+    if (passwordStrength < 50) return 'Orta';
+    if (passwordStrength < 75) return 'İyi';
+    return 'Güçlü';
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-900 relative overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0">
+        <img 
+          src="https://images.pexels.com/photos/1103970/pexels-photo-1103970.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop"
+          alt="Registration Background"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-900/95 via-gray-900/90 to-black/95"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-red-900/20 via-transparent to-orange-900/20"></div>
+      </div>
+
+      {/* Header */}
+      <header className="relative z-10 bg-black/30 backdrop-blur-sm border-b border-gray-700/50">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <button 
+              onClick={onBack}
+              className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors group"
+            >
+              <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+              <span>Ana Sayfaya Dön</span>
+            </button>
+            
+            <div className="text-2xl font-bold text-white tracking-wider font-mono">
+              CİNAYET
+            </div>
+
+            <div className="flex items-center space-x-2 text-gray-400">
+              <UserCheck className="w-5 h-5" />
+              <span className="text-sm">Güvenli Kayıt</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <div className="relative z-10 flex items-center justify-center min-h-screen pt-20 pb-12 px-4">
+        <div className="w-full max-w-2xl">
+          
+          {/* Registration Card */}
+          <div className="bg-gray-800/80 backdrop-blur-lg rounded-2xl border border-gray-600/50 shadow-2xl overflow-hidden">
+            
+            {/* Header */}
+            <div className="bg-gradient-to-r from-orange-600/20 to-red-600/20 border-b border-gray-600/50 p-8">
+              <div className="text-center">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-orange-500 to-red-500 rounded-full mb-4 shadow-lg">
+                  <UserPlus className="w-8 h-8 text-white" />
+                </div>
+                <h1 className="text-3xl font-bold text-white mb-2">Suça Katıl</h1>
+                <p className="text-gray-300">Türkiye'nin en büyük suç imparatorluğuna üye ol</p>
+              </div>
+            </div>
+
+            {/* Form */}
+            <div className="p-8">
+              <form onSubmit={handleSubmit} className="space-y-6">
+                
+                {/* Progress Steps */}
+                <div className="flex items-center justify-center mb-8">
+                  {[1, 2, 3].map((step) => (
+                    <div key={step} className="flex items-center">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border-2 transition-all duration-300 ${
+                        currentStep >= step 
+                          ? 'bg-gradient-to-r from-orange-500 to-red-500 border-orange-500 text-white' 
+                          : 'border-gray-600 text-gray-400'
+                      }`}>
+                        {currentStep > step ? <Check className="w-5 h-5" /> : step}
+                      </div>
+                      {step < 3 && (
+                        <div className={`w-16 h-1 mx-2 rounded transition-colors duration-300 ${
+                          currentStep > step ? 'bg-gradient-to-r from-orange-500 to-red-500' : 'bg-gray-600'
+                        }`} />
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Step 1: Basic Info */}
+                {currentStep === 1 && (
+                  <div className="space-y-6">
+                    <div className="text-center mb-6">
+                      <h2 className="text-xl font-bold text-white mb-2">Temel Bilgiler</h2>
+                      <p className="text-gray-400 text-sm">Hesabının temelini oluşturalım</p>
+                    </div>
+
+                    {/* Username */}
+                    <div className="space-y-2">
+                      <label className="block text-sm font-medium text-white">
+                        Kullanıcı Adı
+                        <span className="text-red-400 ml-1">*</span>
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                          <User className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                          type="text"
+                          name="username"
+                          value={formData.username}
+                          onChange={handleInputChange}
+                          className={`w-full pl-12 pr-4 py-3 bg-gray-700/50 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all duration-300 ${
+                            errors.username 
+                              ? 'border-red-500 focus:ring-red-500/50' 
+                              : 'border-gray-600 focus:border-orange-500 focus:ring-orange-500/50'
+                          }`}
+                          placeholder="Kullanıcı adınızı girin"
+                        />
+                {formData.username && !errors.username && (
+                          <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
+                            <CheckCircle2 className="h-5 w-5 text-green-400" />
+                          </div>
+                        )}
+                      </div>
+                      {errors.username && (
+                        <p className="text-red-400 text-sm flex items-center">
+                          <AlertCircle className="w-4 h-4 mr-1" />
+                          {errors.username}
+                        </p>
+                      )}
+                      <div className="text-xs text-gray-400">
+                        3-20 karakter, sadece harf, rakam ve alt çizgi
+                      </div>
+                    </div>
+
+                    {/* Email */}
+                    <div className="space-y-2">
+                      <label className="block text-sm font-medium text-white">
+                        E-posta Adresi
+                        <span className="text-red-400 ml-1">*</span>
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                          <Mail className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                          type="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleInputChange}
+                          className={`w-full pl-12 pr-4 py-3 bg-gray-700/50 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all duration-300 ${
+                            errors.email 
+                              ? 'border-red-500 focus:ring-red-500/50' 
+                              : 'border-gray-600 focus:border-orange-500 focus:ring-orange-500/50'
+                          }`}
+                          placeholder="ornek@email.com"
+                        />
+                        {formData.email && !errors.email && (
+                          <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
+                            <CheckCircle2 className="h-5 w-5 text-green-400" />
+                          </div>
+                        )}
+                      </div>
+                      {errors.email && (
+                        <p className="text-red-400 text-sm flex items-center">
+                          <AlertCircle className="w-4 h-4 mr-1" />
+                          {errors.email}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Password */}
+                    <div className="space-y-2">
+                      <label className="block text-sm font-medium text-white">
+                        Şifre
+                        <span className="text-red-400 ml-1">*</span>
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                          <KeyRound className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          name="password"
+                          value={formData.password}
+                          onChange={handleInputChange}
+                          className={`w-full pl-12 pr-12 py-3 bg-gray-700/50 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all duration-300 ${
+                            errors.password 
+                              ? 'border-red-500 focus:ring-red-500/50' 
+                              : 'border-gray-600 focus:border-orange-500 focus:ring-orange-500/50'
+                          }`}
+                          placeholder="Güçlü bir şifre oluşturun"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-white transition-colors"
+                        >
+                          {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                        </button>
+                      </div>
+                      
+                      {/* Password Strength */}
+                      {formData.password && (
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-gray-400">Şifre Gücü:</span>
+                            <span className={`text-xs font-medium ${
+                              passwordStrength < 25 ? 'text-red-400' :
+                              passwordStrength < 50 ? 'text-orange-400' :
+                              passwordStrength < 75 ? 'text-yellow-400' :
+                              'text-green-400'
+                            }`}>
+                              {getPasswordStrengthText()}
+                            </span>
+                          </div>
+                          <div className="w-full bg-gray-600 rounded-full h-2">
+                            <div 
+                              className={`h-2 rounded-full transition-all duration-300 ${getPasswordStrengthColor()}`}
+                              style={{ width: `${passwordStrength}%` }}
+                            />
+                          </div>
+                        </div>
+                      )}
+                      
+                      {errors.password && (
+                        <p className="text-red-400 text-sm flex items-center">
+                          <AlertCircle className="w-4 h-4 mr-1" />
+                          {errors.password}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Confirm Password */}
+                    <div className="space-y-2">
+                      <label className="block text-sm font-medium text-white">
+                        Şifre Tekrarı
+                        <span className="text-red-400 ml-1">*</span>
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                          <Lock className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                          type={showConfirmPassword ? "text" : "password"}
+                          name="confirmPassword"
+                          value={formData.confirmPassword}
+                          onChange={handleInputChange}
+                          className={`w-full pl-12 pr-12 py-3 bg-gray-700/50 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all duration-300 ${
+                            errors.confirmPassword 
+                              ? 'border-red-500 focus:ring-red-500/50' 
+                              : 'border-gray-600 focus:border-orange-500 focus:ring-orange-500/50'
+                          }`}
+                          placeholder="Şifrenizi tekrar girin"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-white transition-colors"
+                        >
+                          {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                        </button>
+                        {formData.confirmPassword && formData.password === formData.confirmPassword && (
+                          <div className="absolute inset-y-0 right-12 pr-2 flex items-center">
+                            <CheckCircle2 className="h-5 w-5 text-green-400" />
+                          </div>
+                        )}
+                      </div>
+                      {errors.confirmPassword && (
+                        <p className="text-red-400 text-sm flex items-center">
+                          <AlertCircle className="w-4 h-4 mr-1" />
+                          {errors.confirmPassword}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Next Button */}
+                    <button
+                      type="button"
+                      onClick={() => setCurrentStep(2)}
+                      disabled={!formData.username || !formData.email || !formData.password || !formData.confirmPassword || Object.keys(errors).length > 0}
+                      className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 disabled:from-gray-600 disabled:to-gray-700 text-white py-3 px-6 rounded-lg font-bold transition-all duration-300 transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed"
+                    >
+                      <span className="flex items-center justify-center space-x-2">
+                        <span>Devam Et</span>
+                        <ArrowRight className="w-5 h-5" />
+                      </span>
+                    </button>
+                  </div>
+                )}
+
+                {/* Step 2: Personal Info */}
+                {currentStep === 2 && (
+                  <div className="space-y-6">
+                    <div className="text-center mb-6">
+                      <h2 className="text-xl font-bold text-white mb-2">Kişisel Bilgiler</h2>
+                      <p className="text-gray-400 text-sm">Profilini tamamlayalım</p>
+                    </div>
+
+                    {/* Birth Date */}
+                    <div className="space-y-2">
+                      <label className="block text-sm font-medium text-white">
+                        Doğum Tarihi
+                        <span className="text-red-400 ml-1">*</span>
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                          <CalendarIcon className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                          type="date"
+                          name="birthDate"
+                          value={formData.birthDate}
+                          onChange={handleInputChange}
+                          max={new Date(Date.now() - 13 * 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
+                          className={`w-full pl-12 pr-4 py-3 bg-gray-700/50 border rounded-lg text-white focus:outline-none focus:ring-2 transition-all duration-300 ${
+                            errors.birthDate 
+                              ? 'border-red-500 focus:ring-red-500/50' 
+                              : 'border-gray-600 focus:border-orange-500 focus:ring-orange-500/50'
+                          }`}
+                        />
+                      </div>
+                      {errors.birthDate && (
+                        <p className="text-red-400 text-sm flex items-center">
+                          <AlertCircle className="w-4 h-4 mr-1" />
+                          {errors.birthDate}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Gender */}
+                    <div className="space-y-2">
+                      <label className="block text-sm font-medium text-white">Cinsiyet</label>
+                      <div className="grid grid-cols-3 gap-3">
+                        {[
+                          { value: 'male', label: 'Erkek', icon: '👨' },
+                          { value: 'female', label: 'Kadın', icon: '👩' },
+                          { value: 'other', label: 'Diğer', icon: '👤' }
+                        ].map(option => (
+                          <button
+                            key={option.value}
+                            type="button"
+                            onClick={() => setFormData(prev => ({ ...prev, gender: option.value }))}
+                            className={`p-3 rounded-lg border-2 transition-all duration-300 ${
+                              formData.gender === option.value
+                                ? 'border-orange-500 bg-orange-500/20 text-white'
+                                : 'border-gray-600 bg-gray-700/30 text-gray-300 hover:border-gray-500'
+                            }`}
+                          >
+                            <div className="text-2xl mb-1">{option.icon}</div>
+                            <div className="text-sm font-medium">{option.label}</div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Country & City */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="block text-sm font-medium text-white">Ülke</label>
+                        <select
+                          name="country"
+                          value={formData.country}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-orange-500 focus:ring-orange-500/50 transition-all duration-300"
+                        >
+                          <option value="Turkey">🇹🇷 Türkiye</option>
+                          <option value="Other">🌍 Diğer</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="block text-sm font-medium text-white">Şehir</label>
+                        <select
+                          name="city"
+                          value={formData.city}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:border-orange-500 focus:ring-orange-500/50 transition-all duration-300"
+                        >
+                          <option value="">Şehir seçin</option>
+                          {turkishCities.map(city => (
+                            <option key={city} value={city}>{city}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Navigation */}
+                    <div className="flex space-x-4">
+                      <button
+                        type="button"
+                        onClick={() => setCurrentStep(1)}
+                        className="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 px-6 rounded-lg font-medium transition-colors"
+                      >
+                        <span className="flex items-center justify-center space-x-2">
+                          <ArrowLeft className="w-4 h-4" />
+                          <span>Geri</span>
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setCurrentStep(3)}
+                        className="flex-1 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white py-3 px-6 rounded-lg font-bold transition-all duration-300 transform hover:scale-105"
+                      >
+                        <span className="flex items-center justify-center space-x-2">
+                          <span>Devam Et</span>
+                          <ArrowRight className="w-5 h-5" />
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Step 3: Terms & Confirmation */}
+                {currentStep === 3 && (
+                  <div className="space-y-6">
+                    <div className="text-center mb-6">
+                      <h2 className="text-xl font-bold text-white mb-2">Son Adım</h2>
+                      <p className="text-gray-400 text-sm">Kullanım şartları ve hesap oluşturma</p>
+                    </div>
+
+                    {/* Account Summary */}
+                    <div className="bg-gradient-to-r from-gray-700/40 to-gray-800/40 rounded-lg p-6 border border-gray-600/50">
+                      <h3 className="text-white font-bold mb-4 flex items-center">
+                        <Info className="w-5 h-5 mr-2 text-blue-400" />
+                        Hesap Özeti
+                      </h3>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <span className="text-gray-400">Kullanıcı Adı:</span>
+                          <div className="text-white font-medium">{formData.username}</div>
+                        </div>
+                        <div>
+                          <span className="text-gray-400">E-posta:</span>
+                          <div className="text-white font-medium">{formData.email}</div>
+                        </div>
+                        <div>
+                          <span className="text-gray-400">Cinsiyet:</span>
+                          <div className="text-white font-medium">
+                            {formData.gender === 'male' ? 'Erkek' : 
+                             formData.gender === 'female' ? 'Kadın' : 
+                             formData.gender === 'other' ? 'Diğer' : 'Belirtilmemiş'}
+                          </div>
+                        </div>
+                        <div>
+                          <span className="text-gray-400">Şehir:</span>
+                          <div className="text-white font-medium">{formData.city || 'Belirtilmemiş'}</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Terms and Conditions */}
+                    <div className="space-y-4">
+                      <div className="flex items-start space-x-3">
+                        <input
+                          type="checkbox"
+                          id="agreeTerms"
+                          name="agreeTerms"
+                          checked={formData.agreeTerms}
+                          onChange={handleInputChange}
+                          className="mt-1 w-5 h-5 text-orange-500 bg-gray-700 border-gray-600 rounded focus:ring-orange-500 focus:ring-2"
+                        />
+                        <label htmlFor="agreeTerms" className="text-sm text-gray-300 leading-relaxed">
+                          <span className="text-red-400">*</span> 
+                          <span className="text-orange-400 hover:text-orange-300 cursor-pointer"> Kullanım Şartları</span>, 
+                          <span className="text-orange-400 hover:text-orange-300 cursor-pointer"> Gizlilik Politikası</span> ve 
+                          <span className="text-orange-400 hover:text-orange-300 cursor-pointer"> Çerez Politikası</span>'nı okudum ve kabul ediyorum.
+                        </label>
+                      </div>
+                      {errors.agreeTerms && (
+                        <p className="text-red-400 text-sm flex items-center ml-8">
+                          <AlertCircle className="w-4 h-4 mr-1" />
+                          {errors.agreeTerms}
+                        </p>
+                      )}
+
+                      <div className="flex items-start space-x-3">
+                        <input
+                          type="checkbox"
+                          id="agreeNewsletter"
+                          name="agreeNewsletter"
+                          checked={formData.agreeNewsletter}
+                          onChange={handleInputChange}
+                          className="mt-1 w-5 h-5 text-orange-500 bg-gray-700 border-gray-600 rounded focus:ring-orange-500 focus:ring-2"
+                        />
+                        <label htmlFor="agreeNewsletter" className="text-sm text-gray-300 leading-relaxed">
+                          Oyun güncellemeleri, etkinlikler ve özel teklifler hakkında e-posta almak istiyorum.
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Security Notice */}
+                    <div className="bg-gradient-to-r from-blue-900/20 to-blue-800/20 border border-blue-500/30 rounded-lg p-4">
+                      <div className="flex items-start space-x-3">
+                        <Shield className="w-6 h-6 text-blue-400 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <h4 className="text-blue-400 font-bold text-sm mb-2">Güvenlik Bildirimi</h4>
+                          <p className="text-gray-300 text-xs leading-relaxed">
+                            Hesabınız 256-bit SSL şifreleme ile korunmaktadır. Şifreniz güvenli bir şekilde hash'lenerek saklanır. 
+                            Hesap aktiviteleriniz sürekli izlenir ve şüpheli aktivite durumunda bilgilendirilirsiniz.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Navigation */}
+                    <div className="flex space-x-4">
+                      <button
+                        type="button"
+                        onClick={() => setCurrentStep(2)}
+                        className="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 px-6 rounded-lg font-medium transition-colors"
+                      >
+                        <span className="flex items-center justify-center space-x-2">
+                          <ArrowLeft className="w-4 h-4" />
+                          <span>Geri</span>
+                        </span>
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={!formData.agreeTerms || isSubmitting}
+                        className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:from-gray-600 disabled:to-gray-700 text-white py-3 px-6 rounded-lg font-bold transition-all duration-300 transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed"
+                      >
+                        {isSubmitting ? (
+                          <span className="flex items-center justify-center space-x-2">
+                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                            <span>Hesap Oluşturuluyor...</span>
+                          </span>
+                        ) : (
+                          <span className="flex items-center justify-center space-x-2">
+                            <UserCheck className="w-5 h-5" />
+                            <span>Hesabı Oluştur</span>
+                          </span>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+              </form>
+            </div>
+          </div>
+
+          {/* Additional Info */}
+          <div className="text-center mt-8">
+            <p className="text-gray-400 text-sm">
+              Zaten hesabın var mı? 
+              <button onClick={onBack} className="text-orange-400 hover:text-orange-300 ml-1 font-medium">
+                Giriş Yap
+              </button>
+            </p>
+          </div>
+
+          {/* Features Preview */}
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                icon: <Crown className="w-8 h-8 text-orange-500" />,
+                title: "İmparatorluk Kur",
+                description: "Kendi suç imparatorluğunu inşa et ve rakiplerini alt et"
+              },
+              {
+                icon: <Users className="w-8 h-8 text-red-500" />,
+                title: "Çete Oluştur",
+                description: "Güçlü müttefikler bul ve birlikte hakimiyet sağla"
+              },
+              {
+                icon: <Sword className="w-8 h-8 text-yellow-500" />,
+                title: "Savaşa Katıl",
+                description: "Stratejik savaşlarda yer al ve şehrini kontrol et"
+              }
+            ].map((feature, index) => (
+              <div key={index} className="bg-gray-800/60 backdrop-blur-sm rounded-lg p-6 border border-gray-600/50 text-center">
+                <div className="flex justify-center mb-4">
+                  {feature.icon}
+                </div>
+                <h3 className="text-white font-bold mb-2">{feature.title}</h3>
+                <p className="text-gray-400 text-sm">{feature.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Header Navigation Component
-const Header: React.FC = () => {
+const Header: React.FC<{ onRegisterClick: () => void }> = ({ onRegisterClick }) => {
   return (
     <header className="bg-gray-900/95 backdrop-blur-sm border-b-2 border-orange-500 fixed w-full top-0 z-50">
       <div className="max-w-7xl mx-auto px-4">
@@ -69,7 +825,7 @@ const Header: React.FC = () => {
           
           {/* Navigation */}
           <nav className="hidden md:flex space-x-6">
-            <a href="#" className="text-gray-300 hover:text-white transition-colors">Kayıt Ol</a>
+            <button onClick={onRegisterClick} className="text-gray-300 hover:text-white transition-colors">Kayıt Ol</button>
             <a href="#" className="text-gray-300 hover:text-white transition-colors">Forum</a>
             <a href="#" className="text-gray-300 hover:text-white transition-colors">Haberler</a>
             <a href="#" className="text-gray-300 hover:text-white transition-colors">Wiki</a>
@@ -80,7 +836,7 @@ const Header: React.FC = () => {
 
           {/* Auth Buttons */}
           <div className="flex items-center space-x-4">
-            <button className="text-gray-300 hover:text-white transition-colors text-sm">
+            <button onClick={onRegisterClick} className="text-gray-300 hover:text-white transition-colors text-sm">
               Hesap Oluştur
             </button>
             <button className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded text-sm font-medium transition-colors">
@@ -94,7 +850,7 @@ const Header: React.FC = () => {
 };
 
 // Enhanced Hero Section Component
-const HeroSection: React.FC = () => {
+const HeroSection: React.FC<{ onRegisterClick: () => void }> = ({ onRegisterClick }) => {
   const [currentCity, setCurrentCity] = useState(0);
   const [typedText, setTypedText] = useState('');
   const [isTyping, setIsTyping] = useState(true);
@@ -156,7 +912,7 @@ const HeroSection: React.FC = () => {
               key={i}
               className="absolute w-1 h-1 bg-orange-500/30 rounded-full animate-pulse"
               style={{
-                left: `${Math.random() * 100}%`,
+                left:`${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
                 animationDelay: `${Math.random() * 3}s`,
                 animationDuration: `${2 + Math.random() * 3}s`
@@ -232,7 +988,10 @@ const HeroSection: React.FC = () => {
             {/* CTA Buttons */}
             <div className="space-y-6">
               <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-8">
-                <button className="group relative bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white px-12 py-4 rounded-xl text-xl font-bold transition-all duration-300 transform hover:scale-110 shadow-2xl hover:shadow-red-500/50">
+                <button 
+                  onClick={onRegisterClick}
+                  className="group relative bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white px-12 py-4 rounded-xl text-xl font-bold transition-all duration-300 transform hover:scale-110 shadow-2xl hover:shadow-red-500/50"
+                >
                   <span className="flex items-center space-x-3">
                     <Flame className="w-6 h-6" />
                     <span>SUÇA BAŞLA</span>
@@ -291,7 +1050,8 @@ const HeroSection: React.FC = () => {
           <div className="absolute right-4 top-1/2 transform -translate-y-1/2 space-y-4 max-w-xs hidden lg:block">
             <div className="bg-black/70 backdrop-blur-sm rounded-lg p-4 border border-orange-500/30">
               <h3 className="text-orange-400 font-bold text-sm mb-3 flex items-center">
-                <Trophy className="w4h-4 mr-2" />TOP ÇETELER
+                <Trophy className="w-4 h-4 mr-2" />
+                TOP ÇETELER
               </h3>
               {[{ name: "KaraKartallar", members: "127" },
                 { name: "Ateş Ejderleri", members: "104" }, 
@@ -327,7 +1087,7 @@ const CityBackground: React.FC = () => {
 };
 
 // Join Section Component
-const JoinSection: React.FC = () => {
+const JoinSection: React.FC<{ onRegisterClick: () => void }> = ({ onRegisterClick }) => {
   return (
     <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg p-6 border border-gray-600 hover:border-orange-500/50 transition-all duration-300">
       <div className="bg-gradient-to-r from-orange-600 to-red-600 text-white font-bold text-center py-3 rounded-t mb-4 shadow-lg">
@@ -344,7 +1104,10 @@ const JoinSection: React.FC = () => {
         Kavgalara katıl, çeteler kur, düşmanların yap, suçlar işle ve kendi imparatorluğunu inşa et.
       </p>
       
-      <button className="w-full bg-orange-600 hover:bg-orange-700 text-white py-2 rounded font-medium transition-colors">
+      <button 
+        onClick={onRegisterClick}
+        className="w-full bg-orange-600 hover:bg-orange-700 text-white py-2 rounded font-medium transition-colors"
+      >
         Hemen Katıl
       </button>
     </div>
@@ -677,8 +1440,7 @@ const TopFeatures: React.FC = () => {
     }
   ];
 
-  return (
-    <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg p-6 border border-gray-600 hover:border-orange-500/50 transition-all duration-300">
+  return (<div className="bg-gray-800/80 backdrop-blur-sm rounded-lg p-6 border border-gray-600 hover:border-orange-500/50 transition-all duration-300">
       <h3 className="text-white font-bold mb-4 flex items-center">
         <Gamepad2 className="w-5 h-5 mr-2 text-orange-500" />
         Temel Özellikler
@@ -872,7 +1634,7 @@ const ClanRankings: React.FC = () => {
     <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg p-6 border border-gray-600 hover:border-orange-500/50 transition-all duration-300">
       <h3 className="text-white font-bold mb-4 flex items-center">
         <Users className="w-5 h-5 mr-2 text-orange-500" />
-        ClanSıralamaları
+        Clan Sıralamaları
       </h3>
       
       {/* Period Selection */}
@@ -977,7 +1739,7 @@ const ClanRankings: React.FC = () => {
         <button className="bg-gradient-to-r from-red-600/20 to-orange-600/20 hover:from-red-600/30 hover:to-orange-600/30 text-red-400 py-3 px-4 rounded-lg font-bold transition-all duration-300 border border-red-500/30 hover:border-red-500/50 text-xs">
           <span className="flex items-center justify-center space-x-2">
             <Sword className="w-4 h-4" />
-            <span>Savaş İlan Et</span>
+            <span>Savaşİlan Et</span>
           </span>
         </button>
       </div>
@@ -985,7 +1747,7 @@ const ClanRankings: React.FC = () => {
   );
 };
 
-// Path Selection Component
+// PathSelection Component
 const PathSelection: React.FC = () => {
   const paths = [
     { name: "Çete", icon: <Users className="w-6 h-6" />, description: "Liderlik" },
@@ -1181,12 +1943,26 @@ const FooterBar: React.FC = () => {
 };
 
 function App() {
+  const [showRegistration, setShowRegistration] = useState(false);
+
+  const handleRegisterClick = () => {
+    setShowRegistration(true);
+  };
+
+  const handleBackToHome = () => {
+    setShowRegistration(false);
+  };
+
+  if (showRegistration) {
+    return <RegistrationPage onBack={handleBackToHome} />;
+  }
+
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      <Header />
+      <Header onRegisterClick={handleRegisterClick} />
       
       {/* Hero Section */}
-      <HeroSection />
+      <HeroSection onRegisterClick={handleRegisterClick} />
       
       {/* Main Content */}
       <div className="relative min-h-screen">
@@ -1196,7 +1972,7 @@ function App() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Left Column */}
             <div className="space-y-8">
-              <JoinSection />
+              <JoinSection onRegisterClick={handleRegisterClick} />
               <UserStats />
               <GameClasses />
             </div>
